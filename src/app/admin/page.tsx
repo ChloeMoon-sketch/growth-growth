@@ -138,6 +138,8 @@ export default function AdminPage() {
   useEffect(() => {
     if (!selectedStudent) return;
 
+    console.log("SUBSCRIBING TO DIARIES FOR:", selectedStudent.name, selectedStudent.uid);
+
     const q = query(
       collection(db, 'diaries'),
       where('userId', '==', selectedStudent.uid)
@@ -148,6 +150,7 @@ export default function AdminPage() {
       snapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() } as Diary);
       });
+      console.log("DIARIES RECEIVED FOR:", selectedStudent.name, list.length);
       // 오래된 일기일수록 아래로 가도록 정렬 (날짜 오름차순 -> 생성시간 오름차순)
       list.sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date);
