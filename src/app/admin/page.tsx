@@ -375,7 +375,7 @@ export default function AdminPage() {
                             : 'bg-[#FAF6EE] border-transparent text-[#8C7A6B] hover:bg-[#EADCC9]'
                         }`}
                       >
-                        <span>{student.name}</span>
+                        <span>{student.name} ({student.email.split('@')[0]})</span>
                         <ChevronRight className={`w-4 h-4 transition-transform ${selectedStudent?.uid === student.uid ? 'transform translate-x-1 text-[#FF8E53]' : 'text-gray-400'}`} />
                       </button>
                     </li>
@@ -391,7 +391,7 @@ export default function AdminPage() {
                   <div className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 shadow-md mb-6 transform rotate-[0.1deg]">
                     <h2 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
                       <BookOpen className="w-7 h-7 text-[#FF8E53]" />
-                      <span>{selectedStudent.name} 학생의 일기장</span>
+                      <span>{selectedStudent.name} ({selectedStudent.email.split('@')[0]}) 학생의 일기장</span>
                       <span className="text-sm font-bold text-[#8C7A6B] bg-[#FAF6EE] px-3 py-1 rounded-xl">
                         총 {selectedStudentDiaries.length}개 일기 누적
                       </span>
