@@ -103,8 +103,8 @@ export default function AdminPage() {
             email: data.email || '',
           });
         });
-        // Sort students by name
-        list.sort((a, b) => a.name.localeCompare(b.name));
+        // Sort students by email (student1 -> student2 -> student3)
+        list.sort((a, b) => a.email.localeCompare(b.email));
         setStudents(list);
         if (list.length > 0) {
           setSelectedStudent(list[0]);

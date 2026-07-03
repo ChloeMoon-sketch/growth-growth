@@ -6,8 +6,8 @@ import { mapIdToEmail, mapPasswordToFirebase } from './auth-mapping';
 const SEED_USERS = [
   { id: 'admin', password: '1234', name: '담임 선생님', role: 'admin' },
   { id: 'student1', password: 'student1', name: '김나연', role: 'student' },
-  { id: 'student2', password: 'student2', name: '이준호', role: 'student' },
-  { id: 'student3', password: 'student3', name: '박수민', role: 'student' },
+  { id: 'student2', password: 'student2', name: '박수민', role: 'student' },
+  { id: 'student3', password: 'student3', name: '이준호', role: 'student' },
 ];
 
 export async function seedInitialUsers() {
