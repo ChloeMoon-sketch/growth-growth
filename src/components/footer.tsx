@@ -1,16 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Shield, FileText, User } from 'lucide-react';
+import { X, Shield, FileText, User, HelpCircle, KeyRound, Sparkles, AlertTriangle } from 'lucide-react';
 
 export default function Footer() {
-  const [modalType, setModalType] = useState<'none' | 'terms' | 'privacy'>('none');
+  const [modalType, setModalType] = useState<'none' | 'terms' | 'privacy' | 'guide'>('none');
 
   return (
     <footer className="w-full mt-auto py-8 px-4 border-t-2 border-[#EADCC9] bg-[#FAF6EE] text-center text-sm font-bold text-[#8C7A6B]">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         {/* Links */}
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setModalType('guide')}
+            className="flex items-center gap-1 hover:text-[#4A3E3D] underline cursor-pointer transition-colors"
+          >
+            <HelpCircle className="w-4 h-4" />
+            사용방법 안내
+          </button>
+          <span className="text-[#D2C5B4]">|</span>
           <button
             onClick={() => setModalType('terms')}
             className="hover:text-[#4A3E3D] underline cursor-pointer transition-colors"
@@ -36,19 +44,26 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Policy Modal */}
+      {/* Modal */}
       {modalType !== 'none' && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-3xl border-4 border-[#8C7A6B] w-full max-w-2xl p-6 shadow-2xl relative max-h-[80vh] flex flex-col transform rotate-[-0.2deg]">
             {/* Modal Header */}
             <div className="flex justify-between items-center border-b-3 border-[#FAF6EE] pb-3 mb-4 flex-shrink-0">
               <h3 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
-                {modalType === 'terms' ? (
+                {modalType === 'guide' && (
+                  <>
+                    <HelpCircle className="w-6 h-6 text-[#FF8E53]" />
+                    <span>사용방법 안내</span>
+                  </>
+                )}
+                {modalType === 'terms' && (
                   <>
                     <FileText className="w-6 h-6 text-[#FF8E53]" />
                     <span>이용약관</span>
                   </>
-                ) : (
+                )}
+                {modalType === 'privacy' && (
                   <>
                     <Shield className="w-6 h-6 text-[#FF8E53]" />
                     <span>개인정보처리방침</span>
@@ -64,8 +79,53 @@ export default function Footer() {
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div className="flex-1 overflow-y-auto pr-2 text-left font-bold text-[#4A3E3D] space-y-4 text-base leading-relaxed scrollbar-thin">
-              {modalType === 'terms' ? (
+            <div className="flex-1 overflow-y-auto pr-2 text-left font-bold text-[#4A3E3D] space-y-6 text-base leading-relaxed scrollbar-thin">
+              
+              {/* Guide Content */}
+              {modalType === 'guide' && (
+                <div className="space-y-6">
+                  {/* Step 1: Login */}
+                  <div className="bg-[#FFFCEB] p-4 rounded-2xl border-3 border-[#FFD98E]">
+                    <h4 className="text-lg font-black text-[#D06F00] flex items-center gap-2 mb-2">
+                      <KeyRound className="w-5 h-5" />
+                      1. 로그인 및 비밀번호 변경
+                    </h4>
+                    <p className="text-base text-[#4A3E3D] pl-1">
+                      선생님이 미리 알려준 <strong>아이디</strong>와 <strong>비밀번호</strong>를 입력하여 첫 로그인을 완료해 주세요.<br />
+                      로그인한 후에는 안전한 일기 관리를 위해 우측 상단의 <span className="underline">"비밀번호 변경"</span> 버튼을 눌러 나만의 새 비밀번호(최소 4자리 이상)로 변경하여 사용해 주시기 바랍니다.
+                    </p>
+                  </div>
+
+                  {/* Step 2: Features */}
+                  <div className="bg-[#FAF6EE] p-4 rounded-2xl border-3 border-[#D2C5B4]">
+                    <h4 className="text-lg font-black text-[#5C4D3E] flex items-center gap-2 mb-2">
+                      <Sparkles className="w-5 h-5 text-[#FF8E53]" />
+                      2. 서비스 주요 기능 안내
+                    </h4>
+                    <ul className="list-disc pl-5 space-y-2 text-[#4A3E3D]">
+                      <li><strong>오늘의 일기 쓰기</strong>: 날짜와 오늘 기분(이모지)을 고르고, 오늘 하루 칭찬하고 싶은 점(잘한 점)과 반성할 점(아쉬운 점)을 기록합니다.</li>
+                      <li><strong>나만의 자유 항목</strong>: 정해진 질문 외에도 '감사한 일', '내일의 다짐' 등 나만의 자유 질문 항목을 추가해서 다채로운 기록을 채워 넣을 수 있습니다.</li>
+                      <li><strong>기록 수정 및 삭제</strong>: 쓴 일기 내용에 오타가 생기거나 지우고 싶다면, 일기 카드 우측 상단의 연필(📝) 아이콘과 휴지통(🗑️) 아이콘을 눌러 실시간으로 다듬을 수 있습니다.</li>
+                      <li><strong>오래된 일기 누적</strong>: 작성된 일기는 시간 순으로 차곡차곡 쌓여, 오래된 일기가 가장 아래로 정렬되도록 누적 구성됩니다.</li>
+                    </ul>
+                  </div>
+
+                  {/* Step 3: Notice */}
+                  <div className="bg-[#FFEBEB] p-4 rounded-2xl border-3 border-[#FFD2D2]">
+                    <h4 className="text-lg font-black text-[#D32F2F] flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-5 h-5" />
+                      3. 이용 시 주의사항
+                    </h4>
+                    <p className="text-base text-[#D32F2F] pl-1">
+                      본 성장 일기장에 작성되는 모든 글은 <strong>학급 담임 선생님(교사 대시보드)과 실시간으로 공유</strong>됩니다.<br />
+                      친구를 비난하거나 비속어를 사용하지 않고, 담임 선생님과 소중하게 나눌 수 있는 진솔한 성찰과 고운 말을 담은 성장 기록을 적어주시기 바랍니다.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms Content */}
+              {modalType === 'terms' && (
                 <>
                   <p className="text-[#8C7A6B]">본 이용약관은 성장 일기(이하 '본 서비스')이 제공하는 교육용 웹 애플리케이션 서비스의 이용에 관한 사항을 규정합니다.</p>
                   
@@ -122,7 +182,10 @@ export default function Footer() {
 
                   <p className="text-xs text-[#8C7A6B] mt-6">부칙: 이 약관은 2026년 7월 3일부터 시행됩니다.</p>
                 </>
-              ) : (
+              )}
+
+              {/* Privacy Content */}
+              {modalType === 'privacy' && (
                 <>
                   <p className="text-[#8C7A6B]">성장 일기(이하 '본 서비스')은(는) 개인정보 보호법 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.</p>
 
