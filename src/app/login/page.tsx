@@ -19,6 +19,13 @@ export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
+    // DB의 학생1~3 이름을 김나연, 이준호, 박수민으로 백그라운드 자동 업데이트
+    import('@/lib/seed').then(({ seedInitialUsers }) => {
+      seedInitialUsers().catch((err) => console.error("Auto-seeding failed:", err));
+    });
+  }, []);
+
+  useEffect(() => {
     if (!loading && user && profile) {
       if (profile.role === 'admin') {
         router.push('/admin');
