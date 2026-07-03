@@ -8,6 +8,7 @@ import { updatePassword } from 'firebase/auth';
 import { collection, addDoc, query, where, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { LogOut, KeyRound, Sparkles, AlertCircle, Check, Heart, BookOpen, Trash2, Edit3, Calendar, Smile } from 'lucide-react';
 import { mapPasswordToFirebase } from '@/lib/auth-mapping';
+import Footer from '@/components/footer';
 
 interface Diary {
   id: string;
@@ -234,229 +235,232 @@ export default function StudentPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4 md:p-8 max-w-4xl mx-auto w-full">
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-3xl p-6 border-4 border-[#8C7A6B] shadow-md mb-8 transform rotate-[0.2deg]">
-        <div className="flex items-center gap-3 mb-4 sm:mb-0">
-          <div className="bg-[#FFE3A8] p-2.5 rounded-2xl">
-            <Heart className="w-8 h-8 text-[#FF8E53] fill-[#FF8E53]" />
+    <div className="min-h-screen flex flex-col justify-between bg-[#FAF6EE]">
+      {/* Main Page Container */}
+      <div className="flex-grow p-4 md:p-8 max-w-4xl mx-auto w-full">
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-3xl p-6 border-4 border-[#8C7A6B] shadow-md mb-8 transform rotate-[0.2deg]">
+          <div className="flex items-center gap-3 mb-4 sm:mb-0">
+            <div className="bg-[#FFE3A8] p-2.5 rounded-2xl">
+              <Heart className="w-8 h-8 text-[#FF8E53] fill-[#FF8E53]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-[#4A3E3D] tracking-tight">성장 일기</h1>
+              <p className="text-sm font-bold text-[#8C7A6B]">{profile?.name}의 성장을 응원합니다</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-[#4A3E3D] tracking-tight">성장 일기</h1>
-            <p className="text-sm font-bold text-[#8C7A6B]">{profile?.name}의 성장을 응원합니다</p>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPwModalOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm bg-white hover:bg-[#FAF6EE] text-[#8C7A6B] font-extrabold rounded-xl border-2 border-[#D2C5B4] transition-all cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4" />
+              비밀번호 변경
+            </button>
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#FFEBEB] hover:bg-[#FDD8D8] text-[#D32F2F] font-extrabold rounded-xl border-2 border-[#FFD2D2] transition-all cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              로그아웃
+            </button>
           </div>
-        </div>
+        </header>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsPwModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm bg-white hover:bg-[#FAF6EE] text-[#8C7A6B] font-extrabold rounded-xl border-2 border-[#D2C5B4] transition-all"
-          >
-            <KeyRound className="w-4 h-4" />
-            비밀번호 변경
-          </button>
-          <button
-            onClick={logout}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#FFEBEB] hover:bg-[#FDD8D8] text-[#D32F2F] font-extrabold rounded-xl border-2 border-[#FFD2D2] transition-all"
-          >
-            <LogOut className="w-4 h-4" />
-            로그아웃
-          </button>
-        </div>
-      </header>
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 gap-8">
-        
-        {/* Write Diary Form */}
-        <section className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 md:p-8 shadow-md relative transform rotate-[-0.3deg]">
-          <div className="absolute top-0 bottom-0 left-8 border-l-2 border-dashed border-[#FFC8A2]"></div>
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 gap-8 animate-fade-in">
           
-          <div className="pl-6 relative z-10">
-            <h2 className="text-2xl font-black text-[#4A3E3D] mb-6 flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-[#FF8E53]" />
-              오늘의 성장 일기 쓰기
+          {/* Write Diary Form */}
+          <section className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 md:p-8 shadow-md relative transform rotate-[-0.3deg]">
+            <div className="absolute top-0 bottom-0 left-8 border-l-2 border-dashed border-[#FFC8A2]"></div>
+            
+            <div className="pl-6 relative z-10">
+              <h2 className="text-2xl font-black text-[#4A3E3D] mb-6 flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-[#FF8E53]" />
+                오늘의 성장 일기 쓰기
+              </h2>
+
+              <form onSubmit={handleSubmitDiary} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-lg font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
+                      <Calendar className="w-4 h-4 text-[#8C7A6B]" />
+                      날짜
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full px-4 py-2.5 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-lg font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
+                      <Smile className="w-4 h-4 text-[#8C7A6B]" />
+                      오늘의 기분
+                    </label>
+                    <div className="flex gap-2 justify-between bg-[#FAF6EE] p-2 border-3 border-[#D2C5B4] rounded-2xl">
+                      {MOODS.map((m) => (
+                        <button
+                          key={m.label}
+                          type="button"
+                          onClick={() => setMood(m.emoji)}
+                          className={`text-2xl p-2 rounded-xl transition-all duration-200 ${
+                            mood === m.emoji
+                              ? 'bg-[#FF8E53] scale-110 shadow-md text-white'
+                              : 'hover:bg-[#EADCC9]'
+                          }`}
+                          title={m.label}
+                        >
+                          {m.emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
+                    👏 오늘 내가 잘한 점 (스스로에게 해줄 칭찬)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={praises}
+                    onChange={(e) => setPraises(e.target.value)}
+                    placeholder="예: 친구가 무거운 짐을 드는 것을 도와줬어요! 영어 시험을 노력해서 잘 쳤어요."
+                    className="w-full px-4 py-3 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] placeholder-[#A49685] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
+                    ✍️ 오늘 내가 아쉽거나 잘못한 점 (스스로 되돌아보기)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={reflections}
+                    onChange={(e) => setReflections(e.target.value)}
+                    placeholder="예: 숙제를 조금 늦게 시작해서 늦잠을 잘 뻔했어요. 다음부턴 제때 끝낼게요."
+                    className="w-full px-4 py-3 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] placeholder-[#A49685] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
+                  />
+                </div>
+
+                <div className="bg-[#FFFCEB] p-4 rounded-2xl border-3 border-[#FFD98E] space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-[#D06F00]">💡 나만의 자유 항목 쓰기:</span>
+                    <input
+                      type="text"
+                      value={extraTitle}
+                      onChange={(e) => setExtraTitle(e.target.value)}
+                      placeholder="항목 제목 (예: 감사한 일, 내일의 다짐)"
+                      className="px-3 py-1 border-2 border-[#FFD98E] rounded-xl bg-white text-[#4A3E3D] font-bold focus:outline-none"
+                    />
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={extraContent}
+                    onChange={(e) => setExtraContent(e.target.value)}
+                    placeholder="내용을 채워주세요 (자유롭게 추가할 수 있어요)"
+                    className="w-full px-4 py-2.5 border-2 border-[#FFD98E] rounded-xl bg-white text-[#4A3E3D] placeholder-[#B5A593] font-bold text-lg focus:outline-none focus:ring-2 focus:ring-[#FFE3A8]"
+                  />
+                </div>
+
+                {formMessage && (
+                  <div className={`p-4 rounded-2xl border-2 flex items-center gap-2 font-bold ${
+                    formMessage.type === 'success' 
+                      ? 'bg-green-50 border-green-200 text-green-700' 
+                      : 'bg-red-50 border-red-200 text-red-700'
+                  }`}>
+                    {formMessage.type === 'success' ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    <span>{formMessage.text}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-[#FF8E53] hover:bg-[#FF742E] text-white font-extrabold text-xl rounded-2xl shadow-md border-b-4 border-[#C85D25] transform active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmitting ? '기록 저장 중...' : '일기장 제출하기 📔'}
+                </button>
+              </form>
+            </div>
+          </section>
+
+          {/* Diaries Timeline / Accumulated */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2 pl-2">
+              <BookOpen className="w-6 h-6 text-[#FF8E53]" />
+              내가 쓴 일기들 ({diaries.length}개)
             </h2>
 
-            <form onSubmit={handleSubmitDiary} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
-                    <Calendar className="w-4 h-4 text-[#8C7A6B]" />
-                    날짜
-                  </label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-4 py-2.5 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
-                    <Smile className="w-4 h-4 text-[#8C7A6B]" />
-                    오늘의 기분
-                  </label>
-                  <div className="flex gap-2 justify-between bg-[#FAF6EE] p-2 border-3 border-[#D2C5B4] rounded-2xl">
-                    {MOODS.map((m) => (
-                      <button
-                        key={m.label}
-                        type="button"
-                        onClick={() => setMood(m.emoji)}
-                        className={`text-2xl p-2 rounded-xl transition-all duration-200 ${
-                          mood === m.emoji
-                            ? 'bg-[#FF8E53] scale-110 shadow-md text-white'
-                            : 'hover:bg-[#EADCC9]'
-                        }`}
-                        title={m.label}
-                      >
-                        {m.emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            {diaries.length === 0 ? (
+              <div className="bg-white border-4 border-dashed border-[#D2C5B4] rounded-3xl p-12 text-center">
+                <BookOpen className="w-12 h-12 text-[#A49685] mx-auto mb-3 animate-pulse" />
+                <p className="text-lg font-bold text-[#8C7A6B]">아직 일기가 없습니다. 첫 일기를 써보세요!</p>
               </div>
-
-              <div>
-                <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
-                  👏 오늘 내가 잘한 점 (스스로에게 해줄 칭찬)
-                </label>
-                <textarea
-                  rows={3}
-                  value={praises}
-                  onChange={(e) => setPraises(e.target.value)}
-                  placeholder="예: 친구가 무거운 짐을 드는 것을 도와줬어요! 영어 시험을 노력해서 잘 쳤어요."
-                  className="w-full px-4 py-3 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] placeholder-[#A49685] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
-                  ✍️ 오늘 내가 아쉽거나 잘못한 점 (스스로 되돌아보기)
-                </label>
-                <textarea
-                  rows={3}
-                  value={reflections}
-                  onChange={(e) => setReflections(e.target.value)}
-                  placeholder="예: 숙제를 조금 늦게 시작해서 늦잠을 잘 뻔했어요. 다음부턴 제때 끝낼게요."
-                  className="w-full px-4 py-3 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] placeholder-[#A49685] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53]"
-                />
-              </div>
-
-              <div className="bg-[#FFFCEB] p-4 rounded-2xl border-3 border-[#FFD98E] space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-[#D06F00]">💡 나만의 자유 항목 쓰기:</span>
-                  <input
-                    type="text"
-                    value={extraTitle}
-                    onChange={(e) => setExtraTitle(e.target.value)}
-                    placeholder="항목 제목 (예: 감사한 일, 내일의 다짐)"
-                    className="px-3 py-1 border-2 border-[#FFD98E] rounded-xl bg-white text-[#4A3E3D] font-bold focus:outline-none"
-                  />
-                </div>
-                <textarea
-                  rows={2}
-                  value={extraContent}
-                  onChange={(e) => setExtraContent(e.target.value)}
-                  placeholder="내용을 채워주세요 (자유롭게 추가할 수 있어요)"
-                  className="w-full px-4 py-2.5 border-2 border-[#FFD98E] rounded-xl bg-white text-[#4A3E3D] placeholder-[#B5A593] font-bold text-lg focus:outline-none focus:ring-2 focus:ring-[#FFE3A8]"
-                />
-              </div>
-
-              {formMessage && (
-                <div className={`p-4 rounded-2xl border-2 flex items-center gap-2 font-bold ${
-                  formMessage.type === 'success' 
-                    ? 'bg-green-50 border-green-200 text-green-700' 
-                    : 'bg-red-50 border-red-200 text-red-700'
-                }`}>
-                  {formMessage.type === 'success' ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                  <span>{formMessage.text}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 bg-[#FF8E53] hover:bg-[#FF742E] text-white font-extrabold text-xl rounded-2xl shadow-md border-b-4 border-[#C85D25] transform active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50"
-              >
-                {isSubmitting ? '기록 저장 중...' : '일기장 제출하기 📔'}
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* Diaries Timeline / Accumulated */}
-        <section className="space-y-6">
-          <h2 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2 pl-2">
-            <BookOpen className="w-6 h-6 text-[#FF8E53]" />
-            내가 쓴 일기들 ({diaries.length}개)
-          </h2>
-
-          {diaries.length === 0 ? (
-            <div className="bg-white border-4 border-dashed border-[#D2C5B4] rounded-3xl p-12 text-center">
-              <BookOpen className="w-12 h-12 text-[#A49685] mx-auto mb-3 animate-pulse" />
-              <p className="text-lg font-bold text-[#8C7A6B]">아직 일기가 없습니다. 첫 일기를 써보세요!</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {diaries.map((diary) => (
-                <div
-                  key={diary.id}
-                  className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 shadow-md relative overflow-hidden transform rotate-[-0.2deg]"
-                >
-                  {/* Diary Header info */}
-                  <div className="flex justify-between items-center border-b-2 border-[#FAF6EE] pb-3 mb-4">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl font-bold bg-[#FFE3A8] text-[#8C7A6B] px-3 py-1 rounded-xl">
-                        {diary.date}
-                      </span>
-                      <span className="text-2xl" title="오늘의 기분">
-                        {diary.mood}
-                      </span>
-                    </div>
-
-                    {/* Edit & Delete Action buttons */}
-                    <div className="flex items-center gap-2 z-20">
-                      <button
-                        onClick={() => startEditDiary(diary)}
-                        className="p-2 hover:bg-[#FFE3A8] rounded-xl text-[#8C7A6B] hover:text-[#4A3E3D] transition-colors"
-                        title="일기 수정"
-                      >
-                        <Edit3 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDiary(diary.id)}
-                        className="p-2 hover:bg-[#FFEBEB] rounded-xl text-[#A49685] hover:text-[#D32F2F] transition-colors"
-                        title="일기 삭제"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Diary Fields */}
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-bold text-[#FF8E53]">👏 잘한 점</h4>
-                      <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.praises}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-[#8C7A6B]">✍️ 반성할 점</h4>
-                      <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.reflections}</p>
-                    </div>
-                    {diary.extraContent && (
-                      <div className="bg-[#FFFCEB] p-2.5 rounded-xl border border-[#FFD98E]">
-                        <h4 className="text-xs font-bold text-[#D06F00]">💡 {diary.extraTitle || '기타'}</h4>
-                        <p className="text-base font-bold text-[#4A3E3D] whitespace-pre-wrap">{diary.extraContent}</p>
+            ) : (
+              <div className="space-y-6">
+                {diaries.map((diary) => (
+                  <div
+                    key={diary.id}
+                    className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 shadow-md relative overflow-hidden transform rotate-[-0.2deg]"
+                  >
+                    {/* Diary Header info */}
+                    <div className="flex justify-between items-center border-b-2 border-[#FAF6EE] pb-3 mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl font-bold bg-[#FFE3A8] text-[#8C7A6B] px-3 py-1 rounded-xl">
+                          {diary.date}
+                        </span>
+                        <span className="text-2xl" title="오늘의 기분">
+                          {diary.mood}
+                        </span>
                       </div>
-                    )}
+
+                      {/* Edit & Delete Action buttons */}
+                      <div className="flex items-center gap-2 z-20">
+                        <button
+                          onClick={() => startEditDiary(diary)}
+                          className="p-2 hover:bg-[#FFE3A8] rounded-xl text-[#8C7A6B] hover:text-[#4A3E3D] transition-colors cursor-pointer"
+                          title="일기 수정"
+                        >
+                          <Edit3 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDiary(diary.id)}
+                          className="p-2 hover:bg-[#FFEBEB] rounded-xl text-[#A49685] hover:text-[#D32F2F] transition-colors cursor-pointer"
+                          title="일기 삭제"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Diary Fields */}
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-[#FF8E53]">👏 잘한 점</h4>
+                        <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.praises}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-[#8C7A6B]">✍️ 반성할 점</h4>
+                        <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.reflections}</p>
+                      </div>
+                      {diary.extraContent && (
+                        <div className="bg-[#FFFCEB] p-2.5 rounded-xl border border-[#FFD98E]">
+                          <h4 className="text-xs font-bold text-[#D06F00]">💡 {diary.extraTitle || '기타'}</h4>
+                          <p className="text-base font-bold text-[#4A3E3D] whitespace-pre-wrap">{diary.extraContent}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
 
       {/* Edit Diary Modal */}
@@ -540,7 +544,7 @@ export default function StudentPage() {
                 <button
                   type="button"
                   onClick={() => setEditingDiary(null)}
-                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl"
+                  className="flex-1 py-2.5 bg-gray-200 text-gray-700 font-bold rounded-xl"
                 >
                   취소
                 </button>
@@ -596,14 +600,14 @@ export default function StudentPage() {
                 <button
                   type="button"
                   onClick={() => setIsPwModalOpen(false)}
-                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl"
+                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl cursor-pointer"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
                   disabled={pwSubmitting}
-                  className="flex-1 py-2.5 bg-[#FF8E53] hover:bg-[#FF742E] text-white font-bold rounded-xl border-b-2 border-[#C85D25]"
+                  className="flex-1 py-2.5 bg-[#FF8E53] hover:bg-[#FF742E] text-white font-bold rounded-xl border-b-2 border-[#C85D25] cursor-pointer"
                 >
                   변경하기
                 </button>
@@ -612,6 +616,9 @@ export default function StudentPage() {
           </div>
         </div>
       )}
+
+      {/* Global Footer */}
+      <Footer />
     </div>
   );
 }
