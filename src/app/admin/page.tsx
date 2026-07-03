@@ -98,6 +98,7 @@ export default function AdminPage() {
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
           const uid = docSnap.id;
+          console.log("LOG_STUDENT:", { uid, ...data });
           let name = data.name || '학생';
           
           // Self-healing database correction for swapped student names
