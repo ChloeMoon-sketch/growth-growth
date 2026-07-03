@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { db, auth } from '@/lib/firebase';
 import { updatePassword } from 'firebase/auth';
-import { collection, addDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { LogOut, KeyRound, Sparkles, AlertCircle, Check, Heart, BookOpen, Trash2, Calendar, Smile } from 'lucide-react';
+import { collection, addDoc, query, where, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { LogOut, KeyRound, Sparkles, AlertCircle, Check, Heart, BookOpen, Trash2, Edit3, Calendar, Smile } from 'lucide-react';
 import { mapPasswordToFirebase } from '@/lib/auth-mapping';
 
 interface Diary {
@@ -17,6 +17,7 @@ interface Diary {
   reflections: string;
   extraTitle: string;
   extraContent: string;
+  createdAt?: string;
 }
 
 const MOODS = [
@@ -44,6 +45,16 @@ export default function StudentPage() {
   // Diaries List State
   const [diaries, setDiaries] = useState<Diary[]>([]);
 
+  // Edit Diary Modal States
+  const [editingDiary, setEditingDiary] = useState<Diary | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editMood, setEditMood] = useState('');
+  const [editPraises, setEditPraises] = useState('');
+  const [editReflections, setEditReflections] = useState('');
+  const [editExtraTitle, setEditExtraTitle] = useState('');
+  const [editExtraContent, setEditExtraContent] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // Password Modal State
   const [isPwModalOpen, setIsPwModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -61,11 +72,10 @@ export default function StudentPage() {
     }
   }, [user, profile, loading, router]);
 
-  // Real-time diaries fetching
+  // Real-time diaries fetching (with instant updates)
   useEffect(() => {
     if (!user) return;
 
-    // 오래된 일기가 아래로 가도록 날짜 및 생성 시각 기준 오름차순(ASC) 정렬
     const q = query(
       collection(db, 'diaries'),
       where('userId', '==', user.uid)
@@ -76,8 +86,12 @@ export default function StudentPage() {
       snapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() } as Diary);
       });
-      // 오래된 일기가 아래로 가도록(날짜 오름차순) 메모리 정렬
-      list.sort((a, b) => a.date.localeCompare(b.date));
+      // 오래된 일기일수록 아래로 가도록 정렬 (날짜 오름차순 -> 생성시간 오름차순)
+      list.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return (a.createdAt || '').localeCompare(b.createdAt || '');
+      });
       setDiaries(list);
     }, (error) => {
       console.error("Error fetching diaries:", error);
@@ -111,16 +125,64 @@ export default function StudentPage() {
       });
 
       setFormMessage({ type: 'success', text: '오늘의 일기가 작성되었어요! 🌟' });
-      // Reset form
       setPraises('');
       setReflections('');
       setExtraContent('');
-      // Keep extraTitle and date default
     } catch (error: any) {
       console.error(error);
       setFormMessage({ type: 'error', text: '저장하는 동안 에러가 발생했습니다.' });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Delete Diary Action
+  const handleDeleteDiary = async (id: string) => {
+    if (!confirm('정말 이 일기를 삭제할까요? 한 번 지우면 복구할 수 없어요!')) return;
+    try {
+      await deleteDoc(doc(db, 'diaries', id));
+    } catch (err) {
+      console.error('Error deleting diary:', err);
+      alert('일기 삭제에 실패했습니다.');
+    }
+  };
+
+  // Start Edit Mode
+  const startEditDiary = (diary: Diary) => {
+    setEditingDiary(diary);
+    setEditDate(diary.date);
+    setEditMood(diary.mood);
+    setEditPraises(diary.praises);
+    setEditReflections(diary.reflections);
+    setEditExtraTitle(diary.extraTitle);
+    setEditExtraContent(diary.extraContent);
+  };
+
+  // Submit Edit Diary Form
+  const handleUpdateDiary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDiary) return;
+    if (!editPraises.trim() || !editReflections.trim()) {
+      alert('칭찬할 점과 반성할 점을 채워주세요!');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateDoc(doc(db, 'diaries', editingDiary.id), {
+        date: editDate,
+        mood: editMood,
+        praises: editPraises,
+        reflections: editReflections,
+        extraTitle: editExtraTitle.trim() || '기타',
+        extraContent: editExtraContent,
+      });
+      setEditingDiary(null);
+    } catch (err) {
+      console.error('Error updating diary:', err);
+      alert('일기 수정에 실패했습니다.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -208,7 +270,6 @@ export default function StudentPage() {
         
         {/* Write Diary Form */}
         <section className="bg-white rounded-3xl border-4 border-[#8C7A6B] p-6 md:p-8 shadow-md relative transform rotate-[-0.3deg]">
-          {/* Paper lines decoration */}
           <div className="absolute top-0 bottom-0 left-8 border-l-2 border-dashed border-[#FFC8A2]"></div>
           
           <div className="pl-6 relative z-10">
@@ -218,7 +279,6 @@ export default function StudentPage() {
             </h2>
 
             <form onSubmit={handleSubmitDiary} className="space-y-6">
-              {/* Date & Mood row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-lg font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
@@ -258,7 +318,6 @@ export default function StudentPage() {
                 </div>
               </div>
 
-              {/* Praises */}
               <div>
                 <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
                   👏 오늘 내가 잘한 점 (스스로에게 해줄 칭찬)
@@ -272,7 +331,6 @@ export default function StudentPage() {
                 />
               </div>
 
-              {/* Reflections */}
               <div>
                 <label className="block text-lg font-bold text-[#4A3E3D] mb-2">
                   ✍️ 오늘 내가 아쉽거나 잘못한 점 (스스로 되돌아보기)
@@ -286,7 +344,6 @@ export default function StudentPage() {
                 />
               </div>
 
-              {/* Custom Extra Item */}
               <div className="bg-[#FFFCEB] p-4 rounded-2xl border-3 border-[#FFD98E] space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-[#D06F00]">💡 나만의 자유 항목 쓰기:</span>
@@ -358,22 +415,40 @@ export default function StudentPage() {
                         {diary.mood}
                       </span>
                     </div>
+
+                    {/* Edit & Delete Action buttons */}
+                    <div className="flex items-center gap-2 z-20">
+                      <button
+                        onClick={() => startEditDiary(diary)}
+                        className="p-2 hover:bg-[#FFE3A8] rounded-xl text-[#8C7A6B] hover:text-[#4A3E3D] transition-colors"
+                        title="일기 수정"
+                      >
+                        <Edit3 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDiary(diary.id)}
+                        className="p-2 hover:bg-[#FFEBEB] rounded-xl text-[#A49685] hover:text-[#D32F2F] transition-colors"
+                        title="일기 삭제"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Diary Fields */}
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-sm font-bold text-[#FF8E53]">👏 잘한 점</h4>
-                      <p className="text-lg font-bold text-[#4A3E3D] pl-1">{diary.praises}</p>
+                      <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.praises}</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-[#8C7A6B]">✍️ 반성할 점</h4>
-                      <p className="text-lg font-bold text-[#4A3E3D] pl-1">{diary.reflections}</p>
+                      <p className="text-lg font-bold text-[#4A3E3D] pl-1 whitespace-pre-wrap">{diary.reflections}</p>
                     </div>
                     {diary.extraContent && (
                       <div className="bg-[#FFFCEB] p-2.5 rounded-xl border border-[#FFD98E]">
                         <h4 className="text-xs font-bold text-[#D06F00]">💡 {diary.extraTitle || '기타'}</h4>
-                        <p className="text-base font-bold text-[#4A3E3D]">{diary.extraContent}</p>
+                        <p className="text-base font-bold text-[#4A3E3D] whitespace-pre-wrap">{diary.extraContent}</p>
                       </div>
                     )}
                   </div>
@@ -383,6 +458,104 @@ export default function StudentPage() {
           )}
         </section>
       </div>
+
+      {/* Edit Diary Modal */}
+      {editingDiary && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl border-4 border-[#8C7A6B] w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transform rotate-[0.3deg]">
+            <h3 className="text-2xl font-black text-[#4A3E3D] mb-4 flex items-center gap-2 border-b-2 border-[#FAF6EE] pb-2">
+              <Edit3 className="w-6 h-6 text-[#FF8E53]" />
+              일기장 고치기
+            </h3>
+
+            <form onSubmit={handleUpdateDiary} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#8C7A6B] mb-1">날짜</label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full px-3 py-2 border-2 border-[#D2C5B4] rounded-xl bg-[#FAF6EE] text-[#4A3E3D] font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#8C7A6B] mb-1">오늘의 기분</label>
+                  <div className="flex gap-1 justify-between bg-[#FAF6EE] p-1 border-2 border-[#D2C5B4] rounded-xl">
+                    {MOODS.map((m) => (
+                      <button
+                        key={m.label}
+                        type="button"
+                        onClick={() => setEditMood(m.emoji)}
+                        className={`text-xl p-1.5 rounded-lg transition-all ${
+                          editMood === m.emoji ? 'bg-[#FF8E53] scale-105 shadow text-white' : 'hover:bg-[#EADCC9]'
+                        }`}
+                      >
+                        {m.emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[#8C7A6B] mb-1">👏 오늘 내가 잘한 점</label>
+                <textarea
+                  rows={3}
+                  value={editPraises}
+                  onChange={(e) => setEditPraises(e.target.value)}
+                  className="w-full px-3 py-2 border-2 border-[#D2C5B4] rounded-xl bg-[#FAF6EE] text-[#4A3E3D] font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[#8C7A6B] mb-1">✍️ 오늘 내가 아쉽거나 잘못한 점</label>
+                <textarea
+                  rows={3}
+                  value={editReflections}
+                  onChange={(e) => setEditReflections(e.target.value)}
+                  className="w-full px-3 py-2 border-2 border-[#D2C5B4] rounded-xl bg-[#FAF6EE] text-[#4A3E3D] font-bold"
+                />
+              </div>
+
+              <div className="bg-[#FFFCEB] p-3 rounded-xl border-2 border-[#FFD98E] space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-[#D06F00]">💡 나만의 자유 항목:</span>
+                  <input
+                    type="text"
+                    value={editExtraTitle}
+                    onChange={(e) => setEditExtraTitle(e.target.value)}
+                    className="px-2 py-0.5 border border-[#FFD98E] rounded bg-white text-[#4A3E3D] font-bold text-xs"
+                  />
+                </div>
+                <textarea
+                  rows={2}
+                  value={editExtraContent}
+                  onChange={(e) => setEditExtraContent(e.target.value)}
+                  className="w-full px-3 py-1.5 border border-[#FFD98E] rounded bg-white text-[#4A3E3D] font-bold text-sm"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingDiary(null)}
+                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="flex-1 py-2.5 bg-[#FF8E53] hover:bg-[#FF742E] text-white font-bold rounded-xl border-b-2 border-[#C85D25]"
+                >
+                  {isUpdating ? '저장 중...' : '수정하기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Password Change Modal */}
       {isPwModalOpen && (
