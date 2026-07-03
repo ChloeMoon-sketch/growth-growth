@@ -106,8 +106,7 @@ export default function AdminPage() {
 
     const q = query(
       collection(db, 'diaries'),
-      where('userId', '==', selectedStudent.uid),
-      orderBy('date', 'asc') // 오래된 일기가 아래로 가도록 정렬
+      where('userId', '==', selectedStudent.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -115,6 +114,7 @@ export default function AdminPage() {
       snapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() } as Diary);
       });
+      list.sort((a, b) => a.date.localeCompare(b.date));
       setSelectedStudentDiaries(list);
     }, (error) => {
       console.error("Error fetching student diaries:", error);
@@ -129,8 +129,7 @@ export default function AdminPage() {
 
     const q = query(
       collection(db, 'diaries'),
-      where('userId', '==', user.uid),
-      orderBy('date', 'asc')
+      where('userId', '==', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -138,6 +137,7 @@ export default function AdminPage() {
       snapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() } as Diary);
       });
+      list.sort((a, b) => a.date.localeCompare(b.date));
       setTeacherDiaries(list);
     }, (error) => {
       console.error("Error fetching teacher diaries:", error);

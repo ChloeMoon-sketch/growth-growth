@@ -68,8 +68,7 @@ export default function StudentPage() {
     // 오래된 일기가 아래로 가도록 날짜 및 생성 시각 기준 오름차순(ASC) 정렬
     const q = query(
       collection(db, 'diaries'),
-      where('userId', '==', user.uid),
-      orderBy('date', 'asc')
+      where('userId', '==', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -77,6 +76,8 @@ export default function StudentPage() {
       snapshot.forEach((doc) => {
         list.push({ id: doc.id, ...doc.data() } as Diary);
       });
+      // 오래된 일기가 아래로 가도록(날짜 오름차순) 메모리 정렬
+      list.sort((a, b) => a.date.localeCompare(b.date));
       setDiaries(list);
     }, (error) => {
       console.error("Error fetching diaries:", error);
