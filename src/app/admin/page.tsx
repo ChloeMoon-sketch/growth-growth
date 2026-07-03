@@ -7,6 +7,7 @@ import { db, auth } from '@/lib/firebase';
 import { updatePassword } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, getDocs, addDoc } from 'firebase/firestore';
 import { LogOut, KeyRound, Sparkles, BookOpen, Heart, User, Calendar, Smile, Plus, ChevronRight, PenTool } from 'lucide-react';
+import { mapPasswordToFirebase } from '@/lib/auth-mapping';
 
 interface StudentProfile {
   uid: string;
@@ -179,8 +180,8 @@ export default function AdminPage() {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      setPwError('비밀번호는 최소 6자리 이상이어야 합니다.');
+    if (newPassword.length < 4) {
+      setPwError('비밀번호는 최소 4자리 이상 입력해주세요.');
       return;
     }
 
@@ -190,7 +191,8 @@ export default function AdminPage() {
 
     try {
       if (auth.currentUser) {
-        await updatePassword(auth.currentUser, newPassword);
+        const mappedPw = mapPasswordToFirebase(newPassword);
+        await updatePassword(auth.currentUser, mappedPw);
         setPwSuccess('비밀번호가 성공적으로 변경되었습니다!');
         setNewPassword('');
         setTimeout(() => {
@@ -528,7 +530,7 @@ export default function AdminPage() {
                 <label className="block text-sm font-bold text-[#8C7A6B] mb-1">새 비밀번호</label>
                 <input
                   type="password"
-                  placeholder="6자리 이상 입력해주세요"
+                  placeholder="새 비밀번호 입력"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-4 py-2 border-3 border-[#D2C5B4] rounded-xl bg-[#FAF6EE] text-[#4A3E3D] font-bold focus:outline-none"

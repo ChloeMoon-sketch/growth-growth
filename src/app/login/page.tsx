@@ -4,15 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { auth, db } from '@/lib/firebase';
-import { signInWithEmailAndPassword, updatePassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { seedInitialUsers } from '@/lib/seed';
-import { KeyRound, Mail, Sparkles, BookOpen, Check, AlertCircle } from 'lucide-react';
+import { mapIdToEmail, mapPasswordToFirebase } from '@/lib/auth-mapping';
+import { KeyRound, User as UserIcon, Sparkles, BookOpen, Check, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, profile, loading } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -33,18 +34,22 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('이메일과 비밀번호를 입력해주세요.');
+    if (!username || !password) {
+      setError('아이디와 비밀번호를 입력해주세요.');
       return;
     }
     setError('');
     setLoginLoading(true);
 
     try {
-      // 1. Firebase Auth 로그인
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // 1. 아이디 및 패스워드를 Firebase 규격으로 변환
+      const mappedEmail = mapIdToEmail(username);
+      const mappedPassword = mapPasswordToFirebase(password);
+
+      // 2. Firebase Auth 로그인
+      const userCredential = await signInWithEmailAndPassword(auth, mappedEmail, mappedPassword);
       
-      // 2. Firestore에서 권한 조회
+      // 3. Firestore에서 권한 조회
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
       if (!userDoc.exists()) {
         setError('가입된 사용자 정보를 찾을 수 없습니다.');
@@ -61,8 +66,12 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      if (
+        err.code === 'auth/user-not-found' || 
+        err.code === 'auth/wrong-password' || 
+        err.code === 'auth/invalid-credential'
+      ) {
+        setError('아이디 또는 비밀번호가 올바르지 않습니다.');
       } else {
         setError('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
@@ -122,19 +131,19 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-lg font-bold text-[#4A3E3D] mb-2" htmlFor="email">
-                이메일 아이디
+              <label className="block text-lg font-bold text-[#4A3E3D] mb-2" htmlFor="username">
+                아이디
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className="h-5 w-5 text-[#8C7A6B]" />
+                  <UserIcon className="h-5 w-5 text-[#8C7A6B]" />
                 </span>
                 <input
-                  id="email"
-                  type="email"
-                  placeholder="name@growth.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="아이디 입력 (예: admin, student1)"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border-3 border-[#D2C5B4] rounded-2xl bg-[#FAF6EE] text-[#4A3E3D] placeholder-[#A49685] focus:outline-none focus:ring-4 focus:ring-[#FFE3A8] focus:border-[#FF8E53] text-lg font-bold transition-all"
                 />
               </div>

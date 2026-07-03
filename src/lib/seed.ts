@@ -1,12 +1,13 @@
 import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { mapIdToEmail, mapPasswordToFirebase } from './auth-mapping';
 
 const SEED_USERS = [
-  { email: 'admin@growth.com', password: '123456', name: '담임 선생님', role: 'admin' },
-  { email: 'student1@growth.com', password: 'student1', name: '학생 1', role: 'student' },
-  { email: 'student2@growth.com', password: 'student2', name: '학생 2', role: 'student' },
-  { email: 'student3@growth.com', password: 'student3', name: '학생 3', role: 'student' },
+  { id: 'admin', password: '1234', name: '담임 선생님', role: 'admin' },
+  { id: 'student1', password: 'student1', name: '학생 1', role: 'student' },
+  { id: 'student2', password: 'student2', name: '학생 2', role: 'student' },
+  { id: 'student3', password: 'student3', name: '학생 3', role: 'student' },
 ];
 
 export async function seedInitialUsers() {
@@ -15,14 +16,17 @@ export async function seedInitialUsers() {
 
   for (const user of SEED_USERS) {
     try {
+      const email = mapIdToEmail(user.id);
+      const firebasePassword = mapPasswordToFirebase(user.password);
+
       // 1. Firebase Auth에 사용자 생성
-      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePassword);
       const authUser = userCredential.user;
 
       // 2. Firestore에 사용자 추가 정보 저장
       await setDoc(doc(db, 'users', authUser.uid), {
         uid: authUser.uid,
-        email: user.email,
+        email: email,
         name: user.name,
         role: user.role,
         createdAt: new Date().toISOString(),
@@ -30,10 +34,9 @@ export async function seedInitialUsers() {
       createdCount++;
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
-        // 이미 생성된 경우 정상 처리로 봄
         continue;
       }
-      errorMessages.push(`${user.email}: ${error.message}`);
+      errorMessages.push(`${user.id}: ${error.message}`);
     }
   }
 
