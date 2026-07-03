@@ -127,6 +127,13 @@ export default function LoginPage() {
             </div>
             <h1 className="text-4xl font-extrabold text-[#4A3E3D] tracking-tight">성장 일기</h1>
             <p className="text-[#8C7A6B] mt-2 text-lg">매일 기록하는 나만의 작은 성장 기록장</p>
+            <div className="mt-2 text-xs font-bold text-gray-400">
+              {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'mock-project-placeholder' ? (
+                <span className="text-red-500">⚠️ 환경 변수(.env.local)가 적용되지 않았습니다. 서버를 껐다 켜주세요.</span>
+              ) : (
+                <span className="text-green-600">✓ Firebase 연동 프로젝트: {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}</span>
+              )}
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
