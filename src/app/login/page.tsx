@@ -162,22 +162,6 @@ export default function LoginPage() {
             >
               {loginLoading ? '로그인 중...' : '일기 쓰러 가기!'}
             </button>
-
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const { seedInitialUsers } = await import('@/lib/seed');
-                  await seedInitialUsers();
-                  alert('학생 이름 순서가 성공적으로 동기화되었습니다!');
-                } catch (e: any) {
-                  alert('동기화 실패: ' + e.message);
-                }
-              }}
-              className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-2xl text-sm transition-colors cursor-pointer mt-3"
-            >
-              학생 이름 순서 동기화하기 (박수민/이준호 변경)
-            </button>
           </form>
         </div>
       </div>
