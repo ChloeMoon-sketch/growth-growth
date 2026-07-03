@@ -120,7 +120,7 @@ export default function Footer() {
                   <h4 className="text-lg font-black border-l-4 border-[#FF8E53] pl-2 mt-4 text-[#4A3E3D]">제11조 (분쟁해결)</h4>
                   <p>본 서비스와 이용자 간에 발생한 분쟁에 관하여는 대한민국 법을 적용하며, 소송이 제기되는 경우 서비스 제공자의 소재지(서울사대부고)를 관할하는 법원을 관할법원으로 합니다.</p>
 
-                  <p className="text-xs text-[#8C7A6B] mt-6">부칙: 이 약관은 2026년 6월 27일부터 시행됩니다.</p>
+                  <p className="text-xs text-[#8C7A6B] mt-6">부칙: 이 약관은 2026년 7월 3일부터 시행됩니다.</p>
                 </>
               ) : (
                 <>
@@ -166,7 +166,7 @@ export default function Footer() {
                      • <strong>직위</strong>: 교사<br />
                      • <strong>연락처</strong>: 학교 교무실 (※ 개인정보보호를 위해 교사의 개인 휴대전화 번호는 기재하지 않습니다.)</p>
 
-                  <p className="text-xs text-[#8C7A6B] mt-6">부칙: 이 개인정보 처리방침은 2026년 6월 27일부터 적용됩니다.</p>
+                  <p className="text-xs text-[#8C7A6B] mt-6">부칙: 이 개인정보 처리방침은 2026년 7월 3일부터 적용됩니다.</p>
                 </>
               )}
             </div>
