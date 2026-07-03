@@ -89,6 +89,7 @@ export default function AdminPage() {
   // Load student list
   useEffect(() => {
     if (!user || !profile || profile.role !== 'admin') return;
+    if (students.length > 0) return; // Prevent double-fetching and reference reset
 
     const fetchStudents = async () => {
       try {
@@ -123,7 +124,7 @@ export default function AdminPage() {
         list.sort((a, b) => a.email.localeCompare(b.email));
         setStudents(list);
         if (list.length > 0) {
-          setSelectedStudent(list[0]);
+          setSelectedStudent((prev) => prev || list[0]);
         }
       } catch (err) {
         console.error("Error fetching student profiles:", err);
@@ -131,7 +132,7 @@ export default function AdminPage() {
     };
 
     fetchStudents();
-  }, [user, profile]);
+  }, [user, profile, students.length]);
 
   // Read selected student's diaries in real-time
   useEffect(() => {
