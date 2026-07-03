@@ -88,18 +88,33 @@ export default function AdminPage() {
 
   // Load student list
   useEffect(() => {
-    if (!user || (profile && profile.role !== 'admin')) return;
+    if (!user || !profile || profile.role !== 'admin') return;
 
     const fetchStudents = async () => {
       try {
         const q = query(collection(db, 'users'), where('role', '==', 'student'));
         const querySnapshot = await getDocs(q);
         const list: StudentProfile[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const uid = docSnap.id;
+          let name = data.name || '학생';
+          
+          // Self-healing database correction for swapped student names
+          if (data.email === 'student2@growth.com' && name !== '박수민') {
+            name = '박수민';
+            updateDoc(doc(db, 'users', uid), { name: '박수민' }).catch(console.error);
+          } else if (data.email === 'student3@growth.com' && name !== '이준호') {
+            name = '이준호';
+            updateDoc(doc(db, 'users', uid), { name: '이준호' }).catch(console.error);
+          } else if (data.email === 'student1@growth.com' && name !== '김나연') {
+            name = '김나연';
+            updateDoc(doc(db, 'users', uid), { name: '김나연' }).catch(console.error);
+          }
+
           list.push({
-            uid: doc.id, // doc.id를 사용하여 Auth UID 유실 문제를 100% 방지합니다.
-            name: data.name || '학생',
+            uid,
+            name,
             email: data.email || '',
           });
         });
@@ -282,7 +297,7 @@ export default function AdminPage() {
     }
   };
 
-  if (loading || !user || (profile && profile.role !== 'admin')) {
+  if (loading || !user || !profile || profile.role !== 'admin') {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FAF6EE]">
         <div className="animate-pulse">
